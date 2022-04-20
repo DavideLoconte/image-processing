@@ -1,0 +1,22 @@
+Confronto 
+Valutare distanze
+Matrice intrinseca ed esrinseca
+architetture
+
+[6:15 PM] Prof. Andrea Guerriero
+    
+https://data.mendeley.com/datasets/xh6m6gxhvj/1
+https://www.epfl.ch/labs/cvlab/data/data-wildtrack/
+https://www.epfl.ch/labs/cvlab/data/data-rlc/
+
+
+Riassunto
+
+Technical report
+Paragrafo introduttivo
+Paragrafo sul State of Art
+Descrivere nel dettaglio la tecnica
+Descrivere i risultati ottenuti
+Appendice con documentazione e tutorial
+
+
