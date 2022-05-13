@@ -88,7 +88,7 @@ class KorteRaw(data.Dataset):
         for label in image_labels:
             new_labels.append(KorteLabel(x=label.x * self.width/w1, y=label.y * self.height/h1, c=label.c))
 
-        return image, tuple(new_labels)
+        return image/255.0, tuple(new_labels)
 
     def __len__(self) -> int:
         return len(self.image_names)

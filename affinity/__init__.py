@@ -1,7 +1,7 @@
 from functools import lru_cache
 from math import ceil, floor
 
-from torch import eq, nn, permute, reshape
+from torch import eq, nn, permute, reshape, relu, flatten, sigmoid
 from torchvision.transforms import functional as F
 
 class AffinitySlicer(nn.Module):
@@ -51,10 +51,47 @@ class AffinityNetwork(nn.Module):
         self.slicer = AffinitySlicer(size=60)
         # Input tensor shape after slicing
         # [B, R, Co, Ch, W, H]
+        self.conv1 = nn.Conv2d(3, 8, 10)
+        self.conv2 = nn.Conv2d(8, 16, 10)
+        self.conv3 = nn.Conv2d(16, 24, 8)
+        self.conv4 = nn.Conv2d(24, 32, 4)
+        self.conv5 = nn.Conv2d(32, 40, 2)
 
+        self.lin1 = nn.Linear(38440, 38440/2)
+        self.lin2 = nn.Linear(38440/2, 38440/4)
+        self.lin2 = nn.Linear(38440/2, 6)
         # Output tensor shape
         # [B, R, Co, 5]
 
     def forward(self, x):
+
+        # Input must be batched. If none, create a batch having only one lement inside
+        batched = True
+        if len(x.shape) == 3:
+            batched = False
+            x = x.unsqueeze(0)
+
+        print(x.shape)
         x = self.slicer(x)
+        batch_size = x.shape[0]
+        rows = x.shape[1]
+        columns = x.shape[2]
+        
+        x = reshape(x, (-1, x.shape[3], x.shape[4], x.shape[5]))
+        x = relu(self.conv1(x))
+        x = relu(self.conv2(x))
+        x = relu(self.conv3(x))
+        x = relu(self.conv4(x))
+        x = relu(self.conv5(x))
+        x = flatten(x, start_dim=1, end_dim=3)
+        
+        print(x.shape)
+
+        x = relu(self.lin1(x))
+        x = relu(self.lin2(x))
+        x = sigmoid(self.lin3(x))
+    
+        # If input was not batched, squeeze vector and get rid of batch
+        if not batched:
+            x = x.squeeze(0)
         return x
