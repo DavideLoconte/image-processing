@@ -3,7 +3,7 @@ import numpy as np
 
 _img = None
 
-def points(image):
+def get_points(image):
     winname = "Manual Calibration"
     global _img
     _img = image.copy()
