@@ -32,7 +32,10 @@ def visualize(image, labels = None, predictions = None, checkers = None):
         for prediction in predictions:
             image = annotate_prediction(image, prediction)
     if checkers is not None:
-            image = cv2.drawChessboardCorners(image, (7, 10), checkers, True)
+            if len(checkers) == 4:
+                image = cv2.rectangle(image, (int(checkers[0][0]), int(checkers[0][1])), (int(checkers[-1][0]), int(checkers[-1][1])), (255,0,0), 2)
+            else:
+                image = cv2.drawChessboardCorners(image, (7, 10), checkers, True)
 
     cv2.imshow("Results", image)
     cv2.waitKey(0)

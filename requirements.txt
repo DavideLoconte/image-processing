@@ -11,3 +11,4 @@ scipy
 tqdm
 matplotlib
 seaborn
+scipy

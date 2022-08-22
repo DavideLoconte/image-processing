@@ -1,32 +1,120 @@
-# import dataset
-# import networks
-# import time
-# import evaluation
 
-
-# Evaluation
-
-# dataset = dataset.KorteRaw("KORTE")
-# network = networks.get_yolo('networks/yolov5x6.pt')
-# start = time.time_ns()
-# eval = evaluation.evaluate_box(network, dataset)
-# print(f"Eval in time {(time.time_ns() - start) / 1_000_000_000} s")
-# print(eval)
-
+import sys
+import argparse
 
 import cv2
 import numpy as np
-import prespective.checkers
-import prespective.manual
-from visualize import visualize
 
-source = cv2.imread('source.JPG')
-target = cv2.imread('target.JPG')
+import source
+import perspective
+import model
 
-cv2.resize(source, (1280, 720))
-cv2.resize(target, (1280, 720))
+from setup import setup_video, setup_image
+from detect import detect_video, detect_image
 
-H = prespective.checkers.get_homography(source, target)
-image = prespective.checkers.apply_homography(source, H)
-cv2.imshow('Hello', image)
-cv2.waitKey(0)
+
+def main():
+    parser = argparse.ArgumentParser(description='Social distancing detector demo')
+    parser.add_argument('--image', help='Use image as source')
+    parser.add_argument('--directory', help='Use a directory as source')
+    parser.add_argument('--video', help='Use video as source')
+    parser.add_argument('--camera', help='Use camera as source')
+
+    # Arguments for output visualization
+    parser.add_argument('--nowin', action='store_true', help='Disable output window, outputs only logs on stdout')
+    parser.add_argument('--logs-frequency', help="How many frames between two consecutive logs for camera and video sources", default=10)
+
+    # Arguments for perspective correction)
+    parser.add_argument('--checkerboard-rows', help="Number of rows of the checkerboard", default=8)
+    parser.add_argument('--checkerboard-cols', help="Number of columns of the checkerboard", default=11)
+    parser.add_argument('--checkerboard-size', help="Length in mm of the checkerboard", default=15)
+    parser.add_argument('--homography-data', help="The homography data file for setup", default='homography.bin')
+    parser.add_argument('--pixel-unit', help='Use this to supply custom pixel unit and do not apply homography to sources')
+
+    # Path of the model
+    parser.add_argument('--model', help="Path of the object detector")
+    parser.add_argument('setup', metavar='ACTION', type=str, nargs=1, help='SETUP, DETECT or EVALUATE')
+
+    args = parser.parse_args(sys.argv[1:])
+    sources =  sum([1 if x is not None else 0 for x in [args.image, args.directory, args.video, args.camera]])
+
+    if sources == 0:
+        print("Please select a source")
+        return 1
+    elif sources > 1:
+        print("Please select only one source at a time")
+        return 1
+
+    if args.image:
+        input_source = source.get_image(args.image)
+        is_image = True
+        freq = None
+
+    if args.video:
+        input_source = source.get_video(args.video)
+        is_image = False
+        freq = args.logs_frequency
+
+    if args.directory:
+        input_source = source.get_directory(args.directory)
+        is_image = True
+        freq = None
+
+    if args.camera:
+        try:
+            index = int(args.camera)
+        except ValueError:
+            print("Please specify a integer index for camera sources")
+        input_source = source.get_camera(index)
+        is_image = False
+        freq = args.logs_frequency
+
+    is_video = not is_image
+
+    if args.setup[0].lower().strip() == 'setup':
+        checkerboard = (int(args.checkerboard_rows) - 1, int(args.checkerboard_cols) -1)
+        size = float(args.checkerboard_size)
+        destination = args.homography_data
+
+        if is_video:
+            H, d = setup_video(input_source, checkerboard, size)
+        else:
+            H, d = setup_image(input_source, checkerboard, size)
+
+        if d is None:
+            print("No homography data found")
+        perspective.save_homography(destination, H, d)
+
+
+    elif args.setup[0].lower().strip() == 'detect':
+        H, d = None, None
+
+        try:
+            H, d = perspective.load_homography(args.homography_data)
+        except:
+            pass
+
+        d = args.pixel_unit if args.pixel_unit is not None else d
+
+        if d is None:
+            print("Homography data not found")
+            return 1
+
+        try:
+            yolo = model.get_yolo(args.model)
+        except:
+            yolo = None
+
+        if yolo is None:
+            print("Cannot load object detection model")
+            return 1
+
+        if is_video:
+            detect_video(input_source, yolo, H, 10, freq, args.nowin)
+        else:
+            detect_image(input_source, yolo, H, 10, args.nowin)
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -16,11 +16,11 @@
 
 import cv2
 import numpy as np
-import prespective.checkers
+import perspective
 import prespective.manual
 from visualize import visualize
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
@@ -36,20 +36,10 @@ while True:
         break
 
     image = cv2.resize(image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-    points = prespective.checkers.find_checkerboard(image)
+    H, distance = perspective.single_checkerboard_calibration(image)
+    if H is not None:
+        image = perspective.apply_homography(image, H)
 
-    if first_points is None:
-        first_points = points
-
-    elif first_points is not None and points is not None:
-        H = prespective.checkers.get_homography_from_points(points, first_points)
-        image = prespective.checkers.apply_homography(image, H)
-
-
-    # if points is not None:
-    #     image = cv2.drawChessboardCorners(image, (7, 10), points, True)
-
-    # Display the resulting frame
     cv2.imshow('frame', image)
     if cv2.waitKey(1) == ord('q'):
         break
