@@ -67,6 +67,8 @@ def visualize(frame, predictions, distances, homography = None):
 
     if homography is not None:
         homography_frame = perspective.apply_homography(homography_frame, homography)
-    cv2.imwrite(f"{uuid.uuid1()}.png", np.hstack([predict_frame, distance_frame]))
+
     final_frame = np.vstack([np.hstack([frame, homography_frame]), np.hstack([predict_frame, distance_frame])])
+    cv2.namedWindow("Result", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Result", 1280, 720)
     cv2.imshow("Result", final_frame)

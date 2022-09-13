@@ -35,6 +35,8 @@ def setup_video(source, checkerboard, size, nowin):
 
         if points is None:
             if not nowin:
+                cv2.namedWindow("setup", cv2.WINDOW_NORMAL)
+                cv2.resizeWindow("setup", 1280, 720)
                 cv2.imshow('setup', frame)
                 cv2.waitKey(1)
             start = time.time()
@@ -64,6 +66,8 @@ def setup_video(source, checkerboard, size, nowin):
 
             start = time.time()
         if not nowin:
+            cv2.namedWindow("setup", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("setup", 1280, 720)
             cv2.imshow('setup', frame)
             cv2.waitKey(1)
     return None, None
@@ -86,6 +90,8 @@ def setup_image(source, checkerboard, size, nowin):
                 print("Warning!!! Checkerboard is not correctly oriented")
             frame = cv2.drawChessboardCorners(frame, (checkerboard[0] - 1, checkerboard[1] - 1), points, True)
             if not nowin:
+                cv2.namedWindow("setup", cv2.WINDOW_NORMAL)
+                cv2.resizeWindow("setup", 1280, 720)
                 cv2.imshow('setup', frame)
                 cv2.waitKey(0)
             return perspective.single_checkerboard_calibration(points, checkerboard, size)

@@ -37,6 +37,8 @@ def visualize(image, labels = None, predictions = None, checkers = None):
             else:
                 image = cv2.drawChessboardCorners(image, (7, 10), checkers, True)
 
+    cv2.namedWindow("Results", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Result", 1280, 720)
     cv2.imshow("Results", image)
     cv2.waitKey(0)
 
