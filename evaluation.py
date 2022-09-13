@@ -1,9 +1,47 @@
-import cv2
 import math
-from model.result import Evaluation
-import networks
-from visualize import annotate_label, annotate_prediction, visualize
 
+import cv2
+import tqdm
+import model
+
+
+class Evaluation:
+    def __init__(self, tp, fp, fn) -> None:
+        self._tp = tp
+        self._fp = fp
+        self._fn = fn
+
+    @property
+    def accuracy(self):
+        return self._tp / (self._tp + self._fn + self._fp)
+
+    @property
+    def precision(self):
+        return self._tp / (self._tp + self._fp)
+
+    @property
+    def recall(self):
+        return self._tp / (self._tp + self._fn)
+
+    @property
+    def f1(self):
+        return 2 * self.precision * self.recall / (self.precision + self.recall)
+
+    def __str__(self) -> str:
+        return f"""
+        P\tN\t<-- Classified as
+        {self._tp}\t{self._fn}\t| Positive
+        {self._fp}\t0\t| Negative
+        \n
+        ---
+        \n
+        Accuracy: {self.accuracy}
+        Precision: {self.precision}
+        Recall: {self.recall}
+        """
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 def area(rect) -> float:
     return abs(rect[0] - rect[2]) * abs(rect[1] - rect[3])
@@ -19,10 +57,10 @@ def prediction_contains(label, prediction):
            contains((label[4], label[5]), prediction) +\
            contains((label[6], label[7]), prediction) > 2
 
-def evaluate_box(model, dataset):
+def evaluate_box(model, dataset, confidence=0.75):
     tp, fp, fn = 0, 0, 0
-    for img, labels in dataset:
-        result = evaluate_image(model, img, labels)
+    for img, labels in tqdm.tqdm(dataset):
+        result = evaluate_image(model, img, labels, confidence)
         tp += result[0]
         fp += result[1]
         fn += result[2]
@@ -55,9 +93,9 @@ def select_label(label1, label2, prediction):
         return label1
     return label2
 
-def evaluate_image(model, image, labels, confidence=0.75):
+def evaluate_image(yolo, image, labels, confidence=0.75):
     image = cv2.imread(image)
-    predictions = list(networks.predict(model, image, confidence))
+    predictions = list(model.predict(yolo, image, confidence))
     predictions.sort(key=area, reverse=True)
     tp, fp, fn = 0,0,0
     labels = set(labels)

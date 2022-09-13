@@ -17,7 +17,7 @@ def is_oriented(frame, corners):
 
     return True
 
-def setup_video(source, checkerboard, size):
+def setup_video(source, checkerboard, size, nowin):
     print("Setup through video source")
     print("Please lay down the checkerboard pattern and align it with the camera")
     print("When the checkerboard is found it will be displayed on the screen")
@@ -34,8 +34,9 @@ def setup_video(source, checkerboard, size):
         points = perspective.find_checkerboard(frame, checkerboard)
 
         if points is None:
-            cv2.imshow('setup', frame)
-            cv2.waitKey(1)
+            if not nowin:
+                cv2.imshow('setup', frame)
+                cv2.waitKey(1)
             start = time.time()
             continue
 
@@ -62,25 +63,31 @@ def setup_video(source, checkerboard, size):
                 print("No checkerboard pattern found")
 
             start = time.time()
-        cv2.imshow('setup', frame)
-        cv2.waitKey(1)
+        if not nowin:
+            cv2.imshow('setup', frame)
+            cv2.waitKey(1)
     return None, None
 
-def setup_image(source, checkerboard, size):
+def setup_image(source, checkerboard, size, nowin):
     print("Setup through image sources")
     i = 0
     for frame in source:
         i += 1
         points = perspective.find_checkerboard(frame, checkerboard)
+        if points is None:
+            continue
         corners = perspective.get_corners(points, checkerboard)
         bottom_right = corners[-1][1]
         bottom_left = corners[-1][1]
 
         if abs(bottom_right - bottom_left) < frame.shape[1] * 0.05:
             print(f"Found checkerboard in {i} image")
-            frame = cv2.drawChessboardCorners(frame, checkerboard, points, True)
-            cv2.imshow('setup', frame)
-            cv2.waitKey(0)
+            if not is_oriented(frame, corners):
+                print("Warning!!! Checkerboard is not correctly oriented")
+            frame = cv2.drawChessboardCorners(frame, (checkerboard[0] - 1, checkerboard[1] - 1), points, True)
+            if not nowin:
+                cv2.imshow('setup', frame)
+                cv2.waitKey(0)
             return perspective.single_checkerboard_calibration(points, checkerboard, size)
     print("No checkerboard found")
     return None, None

@@ -2,6 +2,7 @@
 
 import numpy as np
 import cv2
+import time
 
 import model
 import perspective
@@ -12,27 +13,35 @@ def detect_video(source, yolo, homography, distance, nowin, freq):
     number = 0
     for frame in source:
         number += 1
+        start = time.time_ns()
         predictions = model.predict(yolo, frame, 0.5)
+        end = time.time_ns()
+        print(f"Prediction time {(end - start) / 1_000_000} ms")
         distances = measure.get_distances(frame, predictions, homography, distance)
+        violations = measure.get_violations(distances)
         if freq == 0 or number % freq == 0:
-            log(predictions, distances)
-        visualize(frame, predictions, distances, homography)
-        cv2.waitKey(1)
+            log(predictions, violations)
+        if not nowin:
+            visualize(frame, predictions, distances, homography)
+            cv2.waitKey(1)
 
+
+import uuid
 def detect_image(source, yolo, homography, distance, nowin):
     """Detect violation in images"""
     for frame in source:
         predictions = model.predict(yolo, frame, 0.5)
         distances = measure.get_distances(frame, predictions, homography, distance)
-        log(predictions, distances)
+        violations = measure.get_violations(distances)
+        log(predictions, violations)
         if not nowin:
             visualize(frame, predictions, distances, homography)
             cv2.waitKey(0)
+        
 
-def log(predictions, distances):
+def log(predictions, violations):
     """Log the results on stdout"""
-    distances = np.sum(distances) / 2
-    violations = 0
+    violations = np.sum(violations) // 2
     print(f"Found {predictions.shape[0]} persons. Detected {violations} violations")
 
 def visualize(frame, predictions, distances, homography = None):
@@ -52,12 +61,12 @@ def visualize(frame, predictions, distances, homography = None):
 
             center_1 = (prediction[2] - prediction[0]) // 2 + prediction[0], (prediction[3])
             center_2 = (prediction_2[2] - prediction_2[0]) // 2 + prediction_2[0], (prediction_2[3])
-            distance_frame = cv2.line(distance_frame, center_1, center_2, color=color, thickness=2)
+            distance_frame = cv2.line(distance_frame, center_1, center_2, color=color, thickness=distance_frame.shape[0]//250 + 1)
             center = (center_1[0] + center_2[0]) // 2, (center_1[1] + center_2[1]) // 2
-            distance_frame = cv2.putText(img=distance_frame, text=str(int(distances[i][j])) + " mm", org=center, fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=color,thickness=1)
+            distance_frame = cv2.putText(img=distance_frame, text=str(int(distances[i][j])) + " mm", org=center, fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=distance_frame.shape[0]//1000 + 1, color=color,thickness=distance_frame.shape[0]//500)
 
     if homography is not None:
         homography_frame = perspective.apply_homography(homography_frame, homography)
-
+    cv2.imwrite(f"{uuid.uuid1()}.png", np.hstack([predict_frame, distance_frame]))
     final_frame = np.vstack([np.hstack([frame, homography_frame]), np.hstack([predict_frame, distance_frame])])
     cv2.imshow("Result", final_frame)

@@ -72,14 +72,14 @@ def main():
     is_video = not is_image
 
     if args.setup[0].lower().strip() == 'setup':
-        checkerboard = (int(args.checkerboard_rows) - 1, int(args.checkerboard_cols) -1)
+        checkerboard = int(args.checkerboard_rows), int(args.checkerboard_cols)
         size = float(args.checkerboard_size)
         destination = args.homography_data
 
         if is_video:
-            H, d = setup_video(input_source, checkerboard, size)
+            H, d = setup_video(input_source, checkerboard, size, args.nowin)
         else:
-            H, d = setup_image(input_source, checkerboard, size)
+            H, d = setup_image(input_source, checkerboard, size, args.nowin)
 
         if d is None:
             print("No homography data found")
@@ -110,9 +110,9 @@ def main():
             return 1
 
         if is_video:
-            detect_video(input_source, yolo, H, 10, freq, args.nowin)
+            detect_video(input_source, yolo, H, d, freq, args.nowin)
         else:
-            detect_image(input_source, yolo, H, 10, args.nowin)
+            detect_image(input_source, yolo, H, d, args.nowin)
 
     return 0
 

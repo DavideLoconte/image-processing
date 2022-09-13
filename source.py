@@ -3,10 +3,16 @@ import cv2
 
 def get_directory(path: str):
     for filename in os.listdir(path):
-        yield get_image(filename)
+        for image in get_image(f"{path}/{filename}"):
+            yield image
 
 def get_image(path: str):
-    yield cv2.imread(path)
+    try:
+        result = cv2.imread(path)
+        if result is not None:
+            yield result
+    except OSError:
+        pass
 
 __cap = None
 def get_camera(index: int):
