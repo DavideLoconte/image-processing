@@ -13,19 +13,19 @@ class Evaluation:
 
     @property
     def accuracy(self):
-        return self._tp / (self._tp + self._fn + self._fp)
+        return self._tp / (self._tp + self._fn + self._fp) if self._tp + self._fn + self._fp != 0 else 0
 
     @property
     def precision(self):
-        return self._tp / (self._tp + self._fp)
+        return self._tp / (self._tp + self._fp) if self._tp + self._fp != 0 else 0
 
     @property
     def recall(self):
-        return self._tp / (self._tp + self._fn)
+        return self._tp / (self._tp + self._fn) if self._tp + self._fn != 0 else 0
 
     @property
     def f1(self):
-        return 2 * self.precision * self.recall / (self.precision + self.recall)
+        return 2 * self.precision * self.recall / (self.precision + self.recall) if self.precision + self.recall != 0 else 0
 
     def __str__(self) -> str:
         return f"""

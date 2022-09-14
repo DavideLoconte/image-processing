@@ -30,9 +30,12 @@ import uuid
 def detect_image(source, yolo, homography, distance, nowin):
     """Detect violation in images"""
     for frame in source:
+        start = time.time_ns()
         predictions = model.predict(yolo, frame, 0.5)
+        print(f"Prediction time {(time.time_ns() - start) / 1_000_000} ms")
         distances = measure.get_distances(frame, predictions, homography, distance)
         violations = measure.get_violations(distances)
+        
         log(predictions, violations)
         if not nowin:
             visualize(frame, predictions, distances, homography)
