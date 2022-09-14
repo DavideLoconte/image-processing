@@ -1,7 +1,31 @@
 # Image processing
 Repository del tema d'anno di image processing
 
-# Guida all'uso
+### Quick start
+In questa breve sezione si descrive la demo rapida del progetto. Riferisi alle sezioni successive
+per ulteriori informazioni.
+
+1. Installare python3.8 e pip (dipende dal sistema operativo)
+2. Installare le dipendenze del progetto:
+Linux e Mac OS:
+```
+$: pip install -r requirements.txt
+```
+Su Windows
+```
+$: pip install -r requirements-win.txt
+```
+3. Eseguire il setup con le immagini di test per ricavare `homography.bin`:
+```
+$: python main.py setup --checkerboard-cols 9 --checkerboard-rows 6 --checkerboard-size 25 --directory "test/"
+```
+4. Eseguire la demo con le immagini di test:
+```
+$: python main.py detect --model 'checkpoints/pretrained.pt --directory 'test/' --pixel-unit 0.75
+```
+5. Per chiudere le finestre per scorrere le immagini (si può uscire premendo `q`).
+
+### Guida all'uso
 
 ### Prerequisiti
 
@@ -27,7 +51,7 @@ Una volta installate le librerie, il programma può essere avviato eseguendo
 sufficente avviare lo script con il flag `-h`:
 
 ```
-$: python3 main.py -h
+$: python main.py -h
 ```
 
 ### Walkthrough demo
@@ -54,7 +78,7 @@ Per avviare il setup (taratura) bisogna richiamare l'azione specificando le dime
 della scacchiera presente nell'immagine di calibrazione:
 
 ```
-$: python3 main.py setup --checkerboard-cols 9 --checkerboard-rows 6 --checkerboard-size 25 --directory "test/"
+$: python main.py setup --checkerboard-cols 9 --checkerboard-rows 6 --checkerboard-size 25 --directory "test/"
 ```
 
 I parametri `--checkerboard-cols 9`  `--checkerboard-rows 6` e `--checkerboard-size 25` devono rappresentare le 
@@ -68,7 +92,7 @@ Il setup generà i dati per la correzione prospettica e li salverà in `homograp
 Una volta generati questi dati, si può eseguire il task di rilevamento distanza:
 
 ```
-$: python3 main.py detect --model 'checkpoints/pretrained.pt --directory 'test/'
+$: python main.py detect --model 'checkpoints/pretrained.pt --directory 'test/'
 ```
 
 ```
@@ -94,7 +118,7 @@ Un metodo di funzionamento alternativo, usato principalmente a scopo di test, è
 la fase di setup ed avviare il software con:
 
 ```
-$: python3 main.py detect --model 'checkpoints/pretrained.pt --directory 'test/' --pixel-unit 0.75
+$: python main.py detect --model 'checkpoints/pretrained.pt --directory 'test/' --pixel-unit 0.75
 ```
 Il software tenterà comunque di caricare `homography.bin`, ma se questa non è presente, utilizzerà 
 la `--pixel-unit` e una trasformazione identitaria (quindi nessuna correzione prospettica). Questo metodo
@@ -111,7 +135,7 @@ Inoltre, è incluso il dataset KORTE, che nell'ambito del progetto, è stato usa
 e le metriche di accuratezza della rete neurale. Per avviare l'evaluation:
 
 ```
-$: python3 evaluation_main.py
+$: python evaluation_main.py
 ```
 
 Il dataset non è incluso nel repository originale per motivi di spazio.
