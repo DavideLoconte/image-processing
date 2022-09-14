@@ -73,4 +73,3 @@ def visualize(frame, predictions, distances, homography = None):
     cv2.namedWindow("Result", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Result", 1280, 720)
     cv2.imshow("Result", final_frame)
-    cv2.waitKey(1)
