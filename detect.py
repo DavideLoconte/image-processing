@@ -26,7 +26,6 @@ def detect_video(source, yolo, homography, distance, nowin, freq):
             cv2.waitKey(1)
 
 
-import uuid
 def detect_image(source, yolo, homography, distance, nowin):
     """Detect violation in images"""
     for frame in source:
@@ -35,12 +34,11 @@ def detect_image(source, yolo, homography, distance, nowin):
         print(f"Prediction time {(time.time_ns() - start) / 1_000_000} ms")
         distances = measure.get_distances(frame, predictions, homography, distance)
         violations = measure.get_violations(distances)
-        
+
         log(predictions, violations)
         if not nowin:
             visualize(frame, predictions, distances, homography)
-            cv2.waitKey(0)
-        
+
 
 def log(predictions, violations):
     """Log the results on stdout"""
@@ -75,3 +73,4 @@ def visualize(frame, predictions, distances, homography = None):
     cv2.namedWindow("Result", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Result", 1280, 720)
     cv2.imshow("Result", final_frame)
+    cv2.waitKey(1)

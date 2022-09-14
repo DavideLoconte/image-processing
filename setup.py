@@ -51,12 +51,16 @@ def setup_video(source, checkerboard, size, nowin):
                 found = True
                 lost = False
 
-            frame = cv2.drawChessboardCorners(frame, checkerboard, points, True)
+            frame = cv2.drawChessboardCorners(frame, (checkerboard[0] - 1, checkerboard[1] - 1), points, True)
             end = time.time()
             delta = end - start
-            if delta > 2:
-                cv2.destroyAllWindows()
-                return perspective.single_checkerboard_calibration(points, checkerboard, size)
+
+            cv2.namedWindow("setup", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("setup", 1280, 720)
+            cv2.imshow('setup', frame)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            return perspective.single_checkerboard_calibration(points, checkerboard, size)
         else:
 
             if not lost:

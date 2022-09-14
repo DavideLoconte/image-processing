@@ -110,7 +110,7 @@ def main():
             return 1
 
         if is_video:
-            detect_video(input_source, yolo, H, d, freq, args.nowin)
+            detect_video(input_source, yolo, H, d, args.nowin, freq)
         else:
             detect_image(input_source, yolo, H, d, args.nowin)
 

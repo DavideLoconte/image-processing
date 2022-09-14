@@ -37,7 +37,7 @@ def get_corners(points, pattern):
     pattern = (pattern[0]-1, pattern[1]-1)
     return points[np.array([0, pattern[0]-1, -pattern[0], -1])]
 
-def find_checkerboard(image, pattern, flags=cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + cv2.CALIB_CB_NORMALIZE_IMAGE):
+def find_checkerboard(image, pattern, flags=cv2.CALIB_CB_ADAPTIVE_THRESH  + cv2.CALIB_CB_NORMALIZE_IMAGE):
     """Return the checkerboard points of the given pattern from the image"""
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     pattern = (pattern[0]-1, pattern[1]-1)
