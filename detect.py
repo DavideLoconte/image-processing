@@ -38,6 +38,7 @@ def detect_image(source, yolo, homography, distance, nowin):
         log(predictions, violations)
         if not nowin:
             visualize(frame, predictions, distances, homography)
+            cv2.waitKey(0)
 
 
 def log(predictions, violations):
